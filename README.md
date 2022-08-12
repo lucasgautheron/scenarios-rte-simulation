@@ -1,17 +1,17 @@
 # Simulations mix énergétiques
-
 <!-- TOC -->
 
-- [1. Méthodologie](#1-m%C3%A9thodologie)
-- [2. Installation](#2-installation)
-    - [2.1. Installation du répertoire et des données](#21-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es)
-        - [2.1.1. Installation de DataLad](#211-installation-de-datalad)
-        - [2.1.2. Installation du répertoire et des données](#212-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es)
-    - [2.2. Usage du code](#22-usage-du-code)
-        - [2.2.1. Installation des dépendances](#221-installation-des-d%C3%A9pendances)
-        - [2.2.2. Exécution](#222-ex%C3%A9cution)
-- [3. Output](#3-output)
-- [4. TODO](#4-todo)
+- [Simulations mix énergétiques](#simulations-mix-%C3%A9nerg%C3%A9tiques)
+    - [1. Méthodologie](#1-m%C3%A9thodologie)
+    - [2. Installation](#2-installation)
+        - [2.1. Installation du répertoire et des données](#21-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es)
+            - [2.1.1. Installation de DataLad](#211-installation-de-datalad)
+            - [2.1.2. Installation du répertoire et des données](#212-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es)
+        - [2.2. Usage du code](#22-usage-du-code)
+            - [2.2.1. Installation des dépendances](#221-installation-des-d%C3%A9pendances)
+            - [2.2.2. Exécution](#222-ex%C3%A9cution)
+    - [3. Output](#3-output)
+    - [4. TODO](#4-todo)
 
 <!-- /TOC -->
 
@@ -19,7 +19,8 @@ Ce code implémente une simulation simpliste de mix énergétiques, avec une mod
 
 Ce code est l'étape 0 d'un projet qui vise à comprendre les vulnérabilités des différents scénarios de mix énergétiques envisagés pour la France. La modélisation proposée est très simpliste et sous-optimale de plusieurs points de vue.
 
-## Méthodologie 
+## Méthodologie
+<a id="markdown-m%C3%A9thodologie" name="m%C3%A9thodologie"></a>
 
 Les facteurs de charge des sources intermittentes sont tirés des valeurs de [renewables.ninja](https://github.com/renewables-ninja) pour les années 1985 à 2015.
 
@@ -35,10 +36,13 @@ Pour l'instant, le nucléaire est modélisé comme une source non pilotable de f
 Le modèle sera ajusté pour tenir compte des variations saisonnières de disponibilité du nucléaire, optimisées au regard des variations saisonnières de demande.
 
 ## Installation
+<a id="markdown-installation" name="installation"></a>
 
 ### Installation du répertoire et des données
+<a id="markdown-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es" name="installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es"></a>
 
 #### Installation de DataLad
+<a id="markdown-installation-de-datalad" name="installation-de-datalad"></a>
 
 Pour récupérer les données, DataLad est nécessaire. Il s'agit d'une extension de git capable de gérer de gros fichiers.
 
@@ -57,6 +61,7 @@ brew install datalad
 Consulter les instructions pour Windows ou concernant tout éventuel problème impliquant l'installation de DataLad sur n'importe quel système, reportez-vous aux [instructions officielles](https://handbook.datalad.org/en/latest/intro/installation.html#install-datalad).
 
 #### Installation du répertoire et des données
+<a id="markdown-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es" name="installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es"></a>
 
 ```
 datalad install git@github.com:lucasgautheron/scenarios-rte-simulation.git
@@ -65,8 +70,10 @@ datalad get .
 ```
 
 ### Usage du code
+<a id="markdown-usage-du-code" name="usage-du-code"></a>
 
 #### Installation des dépendances
+<a id="markdown-installation-des-d%C3%A9pendances" name="installation-des-d%C3%A9pendances"></a>
 
 Pour installer les dépendances, l'instruction suivante devrait fonctionner (depuis le répertoire) :
  
@@ -75,6 +82,7 @@ pip install -r requirements.txt
 ```
 
 #### Exécution
+<a id="markdown-ex%C3%A9cution" name="ex%C3%A9cution"></a>
 
 Pour exécuter le code, il suffit d'exécuter le script `run.py'.
 
@@ -98,6 +106,7 @@ python run.py --begin 2012-01-01 --end 2015-01-01
 ```
 
 ## Output
+<a id="markdown-output" name="output"></a>
 
 ![](output/load_supply.png)
 
@@ -108,6 +117,7 @@ python run.py --begin 2012-01-01 --end 2015-01-01
 ![](output/gap_distribution.png)
 
 ## TODO
+<a id="markdown-todo" name="todo"></a>
 
   - Optimisation de disponibilité du nucléaire (actuellement un facteur de charge constant est assumé, ce qui pénalise les modèles avec nucléaire)
   - Meilleure modélisation des flexibilités

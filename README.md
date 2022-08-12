@@ -57,3 +57,10 @@ python run.py
 ![](output/dispatch.png)
 
 ![](output/gap_distribution.png)
+
+## TODO
+
+  - Optimisation de disponibilité du nucléaire (actuellement un facteur de charge constant est assumé, ce qui pénalise les modèles avec nucléaire)
+  - Meilleure modélisation des flexibilités
+  - Documentation des sources de données
+  - Documentation du code

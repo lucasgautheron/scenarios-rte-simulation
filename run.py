@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--begin", help="begin date (YYYY-MM-DD), between 1985-01-01 and 2015-01-01", required=True)
 parser.add_argument("--end", help="end date (YYYY-MM-DD), between 1985-01-01 and 2015-01-01", required=True)
 parser.add_argument("--flexibility", help="enable load flexibility modeling", action="store_true")
-parser.add_argument("--scenarios", help="path to scenarios parameters yml file", default="scenarios/rte.yml")
+parser.add_argument("--scenarios", help="path to scenarios parameters yml file", default="scenarios/rte_2050.yml")
 args = parser.parse_args()
 
 with open(args.scenarios, 'r') as f:

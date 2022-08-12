@@ -24,7 +24,7 @@ potential = potential.loc[(
 
 # intermittent sources potential
 p = potential[["onshore", "offshore", "solar"]].to_xarray().to_array()
-p = np.insert(p, 3, 0.68, axis=0)  # nuclear power-like
+p = np.insert(p, 3, 0.7, axis=0)  # nuclear power-like
 
 times = potential.index.get_level_values(0)
 
@@ -41,8 +41,11 @@ fig_dispatch, axes_dispatch = plt.subplots(nrows=6, ncols=2, sharex="col", share
 fig_dispatch.set_figwidth(w*1.5)
 fig_dispatch.set_figheight(h*1.5)
 
-date_fmt = mdates.DateFormatter('%d/%m')
+fig_gap_distribution, axes_gap_distribution = plt.subplots(nrows=3, ncols=2, sharex="col", sharey=True)
+fig_gap_distribution.set_figwidth(w*1.5)
+fig_gap_distribution.set_figheight(h*1.5)
 
+date_fmt = mdates.DateFormatter('%d/%m')
 
 # for step in np.linspace(start, stop, 2050-2022, True)[::-1]:
 row = 0
@@ -69,8 +72,8 @@ for scenario in rte:
     potential["dispatch"] = dp.sum(axis=0)
 
     data = [
-        potential.loc[(slice('2013-12-01 00:00:00',
-                       '2014-01-01 00:00:00'), 'FR'), :],
+        potential.loc[(slice('2013-02-01 00:00:00',
+                       '2013-03-01 00:00:00'), 'FR'), :],
         potential.loc[(slice('2013-06-01 00:00:00',
                        '2013-07-01 00:00:00'), 'FR'), :]
     ]
@@ -121,7 +124,7 @@ for scenario in rte:
         ax.text(
             0.5, 0.87, f"Scénario {scenario} ({months[col]})", ha='center', transform=ax.transAxes)
 
-        ax.set_ylim(25, 225)
+        ax.set_ylim(10, 210)
 
         ax = axes_storage[row, col]
         for i in np.arange(3):
@@ -157,6 +160,17 @@ for scenario in rte:
         ax.text(
             0.5, 0.87, f"Scénario {scenario} ({months[col]})", ha='center', transform=ax.transAxes)
 
+        ax = axes_gap_distribution[row%3, row//3]
+        hist, bin_edges = np.histogram(gap, bins=1000)
+        hist = np.cumsum(hist)
+        hist = 100*(hist - hist.min()) / hist.ptp()
+
+        keep = np.abs(bin_edges[:-1]) < 50
+        ax.plot(bin_edges[:-1][keep], hist[keep], label="power gap")
+        ax.text(
+            0.5, 0.87, f"Scénario {scenario}", ha='center', transform=ax.transAxes)
+        
+
     row += 1
 
 for label in axes[-1, 0].get_xmajorticklabels() + axes[-1, 1].get_xmajorticklabels():
@@ -191,4 +205,11 @@ fig_dispatch.text(1, 0, 'Lucas Gautheron', ha="right")
 fig_dispatch.legend(labels_dispatch, loc='lower right', bbox_to_anchor=(1, -0.1),
            ncol=len(labels_dispatch), bbox_transform=fig_dispatch.transFigure)
 fig_dispatch.savefig("output_dispatch.png", bbox_inches="tight", dpi=200)
+
+fig_gap_distribution.suptitle(f"Power gap cumulative distribution (%)\nSimulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)")
+fig_gap_distribution.legend(["Power gap (available-load) (GW)"], loc='lower right', bbox_to_anchor=(1, -0.1),
+           ncol=1, bbox_transform=fig_dispatch.transFigure)
+fig_gap_distribution.text(1, 0, 'Lucas Gautheron', ha="right")
+fig_gap_distribution.savefig("output_gap_distribution.png", bbox_inches="tight", dpi=200)
+
 plt.show()

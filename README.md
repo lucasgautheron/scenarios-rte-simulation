@@ -1,6 +1,19 @@
 # Simulations mix énergétiques
 
-Ce code implémente une simulation simpliste de mix énergétique. 
+Ce code implémente une simulation simpliste de mix énergétiques, avec une modélisation (grossière) des sources intermittentes, du nucléaire, des sources pilotables, des moyens de stockage, et de la flexibilité de la demande.
+
+Les facteurs de charge des sources intermittentes sont tirés des valeurs de [renewables.ninja](https://github.com/renewables-ninja) pour les années 1985 à 2015.
+
+Les sources pilotables sont modélisées via deux paramètres par type de source : puissance maximale et production annuelle maximale.
+
+Le stockage est modélisé par la charge (maximale permise) de chaque type de stockage (selon un ordre de priorité) en cas de surplus de production et leur décharge (maximale permise) en cas de déficit de production (selon le même ordre de priorité).
+
+La flexibilité de la demande est modélisée par un report de demande optimal pour diminuer le déficit de production. Le modèle possède pour l'instant deux paramètres : la puissance maximale reportable et le temps sur lequel elle peut-être reportée (par défaut, 8 heures).
+
+La consommation est modélisée par un fit des composantes de fourier capturant les variations saisonnières, hebdomadaires et diurnes ajusté aux données de consommation 2012--2021 et normalisées pour obtenir la demande annuelle totale des différents scénarios. D'autres modèles seront proposés, par exemple une modélisation basée sur les températures.
+
+Pour l'instant, le nucléaire est modélisé comme une source non pilotable de facteur de charge constant égal à 0,7.
+Le modèle sera ajusté pour tenir compte des variations saisonnières de disponibilité du nucléaire, optimisées au regard des variations saisonnières de demande.
 
 ## Installation
 

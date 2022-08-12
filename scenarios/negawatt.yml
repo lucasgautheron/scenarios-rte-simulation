@@ -1,0 +1,10 @@
+Negawatt:
+  yearly_total: 354000
+  flexibility_power: 0
+  sources:
+    intermittent: [65, 40, 143, 0]
+    dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
+  multistorage:
+    power: [2, 6.2, 36]
+    capacity: [4, 24, 336]
+    efficiency: [0.8, 0.8, 0.3]

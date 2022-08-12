@@ -1,5 +1,7 @@
 # Simulations mix énergétiques
 
+Ce code implémente une simulation simpliste de mix énergétique. 
+
 ## Installation
 
 ### Installation du répertoire et des données
@@ -45,7 +47,22 @@ pip install -r requirements.txt
 Pour exécuter le code, il suffit d'exécuter le script `run.py'.
 
 ```bash
-python run.py
+$ python run.py --help
+usage: run.py [-h] --begin BEGIN --end END [--flexibility] [--scenarios SCENARIOS]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --begin BEGIN         begin date (YYYY-MM-DD), between 1985-01-01 and 2015-01-01
+  --end END             end date (YYYY-MM-DD), between 1985-01-01 and 2015-01-01
+  --flexibility         enable load flexibility modeling
+  --scenarios SCENARIOS
+                        path to scenarios parameters yml file
+```
+
+Par exemple, pour les scénarios RTE sans flexibilité à partir des facteurs de charge éolien/PV de 2012--2015:
+
+```bash
+python run.py --begin 2012-01-01 --end 2015-01-01
 ```
 
 ## Output

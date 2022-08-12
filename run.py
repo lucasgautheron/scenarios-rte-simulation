@@ -4,20 +4,28 @@ import numpy as np
 from matplotlib import pyplot as plt 
 import matplotlib.dates as mdates
 
+import argparse
 import yaml
 
 from mix_simul.scenarios import Scenario 
 
-with open("scenarios/rte.yml", 'r') as f:
-    rte = yaml.load(f, Loader=yaml.FullLoader)
+parser = argparse.ArgumentParser()
+parser.add_argument("--begin", help="begin date (YYYY-MM-DD), between 1985-01-01 and 2015-01-01", required=True)
+parser.add_argument("--end", help="end date (YYYY-MM-DD), between 1985-01-01 and 2015-01-01", required=True)
+parser.add_argument("--flexibility", help="enable load flexibility modeling", action="store_true")
+parser.add_argument("--scenarios", help="path to scenarios parameters yml file", default="scenarios/rte.yml")
+args = parser.parse_args()
+
+with open(args.scenarios, 'r') as f:
+    scenarios = yaml.load(f, Loader=yaml.FullLoader)
 
 potential = pd.read_parquet("data/potential.parquet")
 potential = potential.loc['1985-01-01 00:00:00':'2015-01-01 00:00:00', :]
 potential.fillna(0, inplace=True)
 
-begin = "2012-01-01"
-end = "2015-01-01"
-flexibility = False
+begin = args.begin
+end = args.end
+flexibility = args.flexibility
 
 potential = potential.loc[(
     slice(f'{begin} 00:00:00', f'{end} 00:00:00'), 'FR'), :]
@@ -28,30 +36,57 @@ p = np.insert(p, 3, 0.7, axis=0)  # nuclear power-like
 
 times = potential.index.get_level_values(0)
 
-fig, axes = plt.subplots(nrows=6, ncols=2, sharex="col", sharey=True)
+n_scenarios = len(scenarios)
+
+fig, axes = plt.subplots(nrows=n_scenarios, ncols=2, sharex="col", sharey=True)
 w, h = fig.get_size_inches()
 fig.set_figwidth(w*1.5)
 fig.set_figheight(h*1.5)
 
-fig_storage, axes_storage = plt.subplots(nrows=6, ncols=2, sharex="col", sharey=True)
+fig_storage, axes_storage = plt.subplots(nrows=n_scenarios, ncols=2, sharex="col", sharey=True)
 fig_storage.set_figwidth(w*1.5)
 fig_storage.set_figheight(h*1.5)
 
-fig_dispatch, axes_dispatch = plt.subplots(nrows=6, ncols=2, sharex="col", sharey=True)
+fig_dispatch, axes_dispatch = plt.subplots(nrows=n_scenarios, ncols=2, sharex="col", sharey=True)
 fig_dispatch.set_figwidth(w*1.5)
 fig_dispatch.set_figheight(h*1.5)
 
-fig_gap_distribution, axes_gap_distribution = plt.subplots(nrows=3, ncols=2, sharex="col", sharey=True)
+fig_gap_distribution, axes_gap_distribution = plt.subplots(nrows=int(np.ceil(n_scenarios/2)), ncols=2, sharex="col", sharey=True)
 fig_gap_distribution.set_figwidth(w*1.5)
 fig_gap_distribution.set_figheight(h*1.5)
+
+months = [
+    "Février",
+    "Juin"
+]
+
+labels = [
+    "load (GW)",
+    "production (GW)",
+    "available power (production-storage) (GW)",
+    "power deficit"
+]
+
+labels_storage = [
+    "Batteries (TWh)",
+    "STEP (TWh)",
+    "P2G (TWh)"
+]
+
+labels_dispatch = [
+    "Hydro (GW)",
+    "Biomass (GW)",
+    "Thermal (GW)"
+]
 
 date_fmt = mdates.DateFormatter('%d/%m')
 
 # for step in np.linspace(start, stop, 2050-2022, True)[::-1]:
 row = 0
-for scenario in rte:
-    rte[scenario]["flexibility_power"] = 0
-    scenario_model = Scenario(**rte[scenario])
+for scenario in scenarios:
+    if not flexibility:
+        scenarios[scenario]["flexibility_power"] = 0
+    scenario_model = Scenario(**scenarios[scenario])
     S, load, production, gap, storage, dp = scenario_model.run(times, p)
 
     print(f"{scenario}:", S, gap.max(), np.quantile(gap, 0.95))
@@ -78,32 +113,8 @@ for scenario in rte:
                        '2013-07-01 00:00:00'), 'FR'), :]
     ]
 
-    months = [
-        "Février",
-        "Juin"
-    ]
-
-    labels = [
-        "load (GW)",
-        "production (GW)",
-        "available power (production-storage) (GW)",
-        "power deficit"
-    ]
-
-    labels_storage = [
-        "Batteries (TWh)",
-        "STEP (TWh)",
-        "P2G (TWh)"
-    ]
-
-    labels_dispatch = [
-        "Hydro (GW)",
-        "Biomass (GW)",
-        "Thermal (GW)"
-    ]
-
     for col in range(2):
-        ax = axes[row, col]
+        ax = axes[row, col] if axes.ndim > 1 else axes[col]
         ax.plot(data[col].index.get_level_values(0), data[col]
                 ["load"], label="adjusted load (GW)", lw=1)
         ax.plot(data[col].index.get_level_values(0), data[col]
@@ -126,7 +137,7 @@ for scenario in rte:
 
         ax.set_ylim(10, 210)
 
-        ax = axes_storage[row, col]
+        ax = axes_storage[row, col] if axes.ndim > 1 else axes_storage[col]
         for i in np.arange(3):
             if i == 2:
                 base = 0
@@ -143,7 +154,7 @@ for scenario in rte:
         ax.text(
             0.5, 0.87, f"Scénario {scenario} ({months[col]})", ha='center', transform=ax.transAxes)
 
-        ax = axes_dispatch[row, col]
+        ax = axes_dispatch[row, col] if axes.ndim > 1 else axes_dispatch[col]
         for i in range(dp.shape[0]):
             if i == 0:
                 base = 0
@@ -160,8 +171,9 @@ for scenario in rte:
         ax.text(
             0.5, 0.87, f"Scénario {scenario} ({months[col]})", ha='center', transform=ax.transAxes)
 
-        ax = axes_gap_distribution[row%3, row//3]
-        hist, bin_edges = np.histogram(gap, bins=1000)
+        div = int(np.ceil(n_scenarios/2))
+        ax = axes_gap_distribution[row%div, row//div] if axes_gap_distribution.ndim > 1 else axes_gap_distribution[row%div]
+        hist, bin_edges = np.histogram(-gap, bins=1000)
         hist = np.cumsum(hist)
         hist = 100*(hist - hist.min()) / hist.ptp()
 
@@ -173,17 +185,15 @@ for scenario in rte:
 
     row += 1
 
-for label in axes[-1, 0].get_xmajorticklabels() + axes[-1, 1].get_xmajorticklabels():
-    label.set_rotation(30)
-    label.set_horizontalalignment("right")
-
-for label in axes_storage[-1, 0].get_xmajorticklabels() + axes_storage[-1, 1].get_xmajorticklabels():
-    label.set_rotation(30)
-    label.set_horizontalalignment("right")
-
-for label in axes_dispatch[-1, 0].get_xmajorticklabels() + axes_dispatch[-1, 1].get_xmajorticklabels():
-    label.set_rotation(30)
-    label.set_horizontalalignment("right")
+for axs in [axes, axes_dispatch, axes_storage]:
+    if axes.ndim > 1:
+        for label in axs[-1, 0].get_xmajorticklabels() + axs[-1, 1].get_xmajorticklabels():
+            label.set_rotation(30)
+            label.set_horizontalalignment("right")
+    else:
+        for label in axs[0].get_xmajorticklabels() + axs[-1].get_xmajorticklabels():
+            label.set_rotation(30)
+            label.set_horizontalalignment("right")
 
 flex = "With" if flexibility else "Without"
 

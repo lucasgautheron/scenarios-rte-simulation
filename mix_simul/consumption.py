@@ -94,11 +94,11 @@ class ConsumptionFlexibilityModel:
         constraints = [
             h >= 0,
             h <= 1,
-            h[:, 0] >= 1-flexibility_power/load, # bound on the fraction of the demand at any time that can be postponed
-            cp.multiply(load, cp.sum(h, axis=1))-load <= flexibility_power, # total demand conservation
+            h[:, 0] >= 1-self.flexibility_power/load, # bound on the fraction of the demand at any time that can be postponed
+            cp.multiply(load, cp.sum(h, axis=1))-load <= self.flexibility_power, 
         ] + [
-            reduce(lambda x, y: x+y, [h[t-l, l] for l in range(tau)]) == 1
-            for t in np.arange(flexibility_time, T)
+            reduce(lambda x, y: x+y, [h[t-l, l] for l in range(tau)]) == 1 # total demand conservation
+            for t in np.arange(tau, T)
         ]
 
         prob = cp.Problem(

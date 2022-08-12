@@ -47,3 +47,13 @@ Pour exécuter le code, il suffit d'exécuter le script `run.py'.
 ```bash
 python run.py
 ```
+
+## Output
+
+![](output/load_supply.png)
+
+![](output/storage.png)
+
+![](output/dispatch.png)
+
+![](output/gap_distribution.png)

@@ -6,12 +6,13 @@ import yaml
 
 
 class Scenario:
-    def __init__(self,
-        yearly_total = 645*1000,
+    def __init__(
+        self,
+        yearly_total=645 * 1000,
         sources: dict = {},
         multistorage: dict = {},
         flexibility_power=0,
-        flexibility_time=8
+        flexibility_time=8,
     ):
         self.yearly_total = yearly_total
         self.sources = sources
@@ -27,8 +28,7 @@ class Scenario:
 
         # intermittent sources (or sources with fixed load factors)
         intermittent_array = IntermittentArray(
-            intermittent_load_factors,
-            np.transpose([self.sources["intermittent"]])
+            intermittent_load_factors, np.transpose([self.sources["intermittent"]])
         )
         power = intermittent_array.power()
 
@@ -38,18 +38,18 @@ class Scenario:
             )
             load = flexibility_model.run(load, power)
 
-        power_delta = power-load
+        power_delta = power - load
 
         # adjust power to load with storage
         storage_model = MultiStorageModel(
             self.multistorage["capacity"],
             self.multistorage["power"],
             self.multistorage["power"],
-            self.multistorage["efficiency"]
+            self.multistorage["efficiency"],
         )
 
         storage, storage_impact = storage_model.run(power_delta)
-        gap = load-power-storage_impact.sum(axis=0)
+        gap = load - power - storage_impact.sum(axis=0)
 
         # further adjust power to load with dispatchable power sources
         dispatchable_model = DispatchableArray(self.sources["dispatchable"])

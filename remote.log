@@ -1,0 +1,1 @@
+8f49ff6a-2592-4b88-8996-9f58fed812d0 autoenable=true bucket=simulation-scenarios-rte datacenter=eu-west-3 encryption=none host=s3.amazonaws.com name=s3 port=80 public=yes publicurl=https://inspire-harvest.s3-eu-west-3.amazonaws.com signature=v4 storageclass=STANDARD type=S3 timestamp=1660302392.033301s

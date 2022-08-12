@@ -1,0 +1,65 @@
+M0:
+  yearly_total: 645000
+  flexibility_power: 17
+  sources:
+    intermittent: [74, 62, 208, 0]
+    dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
+  multistorage:
+    power: [26, 8, 29]
+    capacity: [4, 24, 336]
+    efficiency: [0.8, 0.8, 0.3]
+
+M1:
+  yearly_total: 645000
+  flexibility_power: 17
+  sources:
+    intermittent: [59, 45, 214, 16]
+    dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
+  multistorage:
+    power: [21, 8, 20]
+    capacity: [4, 24, 336]
+    efficiency: [0.8, 0.8, 0.3]
+
+M23:
+  yearly_total: 645000
+  flexibility_power: 17
+  sources:
+    intermittent: [72, 60, 125, 16]
+    dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
+  multistorage:
+    power: [13, 8, 20]
+    capacity: [4, 24, 336]
+    efficiency: [0.8, 0.8, 0.3]
+
+N1:
+  yearly_total: 645000
+  flexibility_power: 17
+  sources:
+    intermittent: [58, 45, 118, 29]
+    dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
+  multistorage:
+    power: [9, 8, 11]
+    capacity: [4, 24, 336]
+    efficiency: [0.8, 0.8, 0.3]
+
+N2:
+  yearly_total: 645000
+  flexibility_power: 17
+  sources:
+    intermittent: [52, 36, 90, 39]
+    dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
+  multistorage:
+    power: [2, 8, 5]
+    capacity: [4, 24, 336]
+    efficiency: [0.8, 0.8, 0.3]
+
+N03:
+  yearly_total: 645000
+  flexibility_power: 17
+  sources:
+    intermittent: [43, 22, 70, 51]
+    dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
+  multistorage:
+    power: [1, 8, 0]
+    capacity: [4, 24, 336]
+    efficiency: [0.8, 0.8, 0.3]

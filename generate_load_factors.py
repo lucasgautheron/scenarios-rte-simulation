@@ -1,5 +1,5 @@
-wind_data = pd.read_csv("ninja_wind_europe_v1.1_current_on-offshore.csv")
-solar_data = pd.read_csv("ninja_pv_europe_v1.1_merra2.csv")
+wind_data = pd.read_csv("data/ninja_wind_europe_v1.1_current_on-offshore.csv")
+solar_data = pd.read_csv("data/ninja_pv_europe_v1.1_merra2.csv")
 
 wind_data['time'] = pd.to_datetime(wind_data['time'], format="%Y-%m-%d %H:%M:%S")
 solar_data['time'] = pd.to_datetime(solar_data['time'], format="%Y-%m-%d %H:%M:%S")
@@ -40,4 +40,4 @@ potential = potential.merge(pd.DataFrame(solar), left_index=True, right_index=Tr
 print(potential)
 potential.sort_values(["time", "region"], inplace=True)
 
-potential.to_parquet("potential.parquet")
+potential.to_parquet("data/potential.parquet")

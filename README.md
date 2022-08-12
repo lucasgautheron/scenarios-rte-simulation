@@ -42,7 +42,7 @@ pip install -r requirements.txt
 
 #### Exécution
 
-Pour exécuter le code, il suffit d'exécuter le script `run.py'. Veillez à bien déverrouiller les fichiers de sortie au préalable.
+Pour exécuter le code, il suffit d'exécuter le script `run.py'.
 
 ```bash
 python run.py

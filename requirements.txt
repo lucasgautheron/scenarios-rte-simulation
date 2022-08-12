@@ -1,0 +1,6 @@
+datalad
+pandas
+numpy
+cvxpy
+numba
+matplotlib

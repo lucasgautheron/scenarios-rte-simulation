@@ -192,24 +192,24 @@ fig.suptitle(f"Simulations based on {begin}--{end} weather data.\n{flex} consump
 fig.text(1, 0, 'Lucas Gautheron', ha="right")
 fig.legend(labels, loc='lower right', bbox_to_anchor=(1, -0.1),
            ncol=len(labels), bbox_transform=fig.transFigure)
-fig.savefig("output.png", bbox_inches="tight", dpi=200)
+fig.savefig("output/load_supply.png", bbox_inches="tight", dpi=200)
 
 fig_storage.suptitle(f"Simulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)")
 fig_storage.text(1, 0, 'Lucas Gautheron', ha="right")
 fig_storage.legend(labels_storage, loc='lower right', bbox_to_anchor=(1, -0.1),
            ncol=len(labels_storage), bbox_transform=fig_storage.transFigure)
-fig_storage.savefig("output_storage.png", bbox_inches="tight", dpi=200)
+fig_storage.savefig("output/storage.png", bbox_inches="tight", dpi=200)
 
 fig_dispatch.suptitle(f"Simulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)")
 fig_dispatch.text(1, 0, 'Lucas Gautheron', ha="right")
 fig_dispatch.legend(labels_dispatch, loc='lower right', bbox_to_anchor=(1, -0.1),
            ncol=len(labels_dispatch), bbox_transform=fig_dispatch.transFigure)
-fig_dispatch.savefig("output_dispatch.png", bbox_inches="tight", dpi=200)
+fig_dispatch.savefig("output/dispatch.png", bbox_inches="tight", dpi=200)
 
 fig_gap_distribution.suptitle(f"Power gap cumulative distribution (%)\nSimulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)")
 fig_gap_distribution.legend(["Power gap (available-load) (GW)"], loc='lower right', bbox_to_anchor=(1, -0.1),
            ncol=1, bbox_transform=fig_dispatch.transFigure)
 fig_gap_distribution.text(1, 0, 'Lucas Gautheron', ha="right")
-fig_gap_distribution.savefig("output_gap_distribution.png", bbox_inches="tight", dpi=200)
+fig_gap_distribution.savefig("output/gap_distribution.png", bbox_inches="tight", dpi=200)
 
 plt.show()

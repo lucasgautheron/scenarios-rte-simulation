@@ -1,5 +1,20 @@
 # Simulations mix énergétiques
 
+<!-- TOC -->
+
+- [1. Méthodologie](#1-m%C3%A9thodologie)
+- [2. Installation](#2-installation)
+    - [2.1. Installation du répertoire et des données](#21-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es)
+        - [2.1.1. Installation de DataLad](#211-installation-de-datalad)
+        - [2.1.2. Installation du répertoire et des données](#212-installation-du-r%C3%A9pertoire-et-des-donn%C3%A9es)
+    - [2.2. Usage du code](#22-usage-du-code)
+        - [2.2.1. Installation des dépendances](#221-installation-des-d%C3%A9pendances)
+        - [2.2.2. Exécution](#222-ex%C3%A9cution)
+- [3. Output](#3-output)
+- [4. TODO](#4-todo)
+
+<!-- /TOC -->
+
 Ce code implémente une simulation simpliste de mix énergétiques, avec une modélisation (grossière) des sources intermittentes, du nucléaire, des sources pilotables, des moyens de stockage, et de la flexibilité de la demande.
 
 Ce code est l'étape 0 d'un projet qui vise à comprendre les vulnérabilités des différents scénarios de mix énergétiques envisagés pour la France. La modélisation proposée est très simpliste et sous-optimale de plusieurs points de vue.

@@ -8,6 +8,7 @@
 - [Usage du code](#usage-du-code)
   - [Exécution](#exécution)
 - [Output](#output)
+- [Limitations](#limitations)
 - [TODO](#todo)
 
 Ce code implémente une simulation simpliste de mix énergétiques, avec une modélisation (grossière) des sources intermittentes, du nucléaire, des sources pilotables, des moyens de stockage, et de la flexibilité de la demande.
@@ -99,6 +100,15 @@ python run.py --begin 2012-01-01 --end 2015-01-01
 ![](output/dispatch.png)
 
 ![](output/gap_distribution.png)
+
+## Limitations
+
+Outre les limitations mentionnées plus haut, il faut en souligner d'autres ici :
+
+ - Chaque optimisation du modèle est effectuée séquentiellement. Mais de meilleurs optimums pourraient être trouvés en optimisant simultanément toutes les commandes (stockage, flexibilités et sources pilotables). En particulier la performance du modèle actuel dépend de l'ordre des optimisations.
+ - La question cruciale est bien sûr, pour quoi optimise-t-on ? Dans le cas présent la fonction de coût est égale à l'énergie manquante totale pour absorber la demande française avec la production française. Cela est pertinent dans le sens suivant : ce manque doit être compensé par, soit, des énergies fossiles raréfiées émettrices de CO2 ; soit des importations ; soit de l'effacement. On cherche à minimiser simultanément ces conséquences indésirables, et donc l'énergie totale manquante est un paramètre relativement sensé. Cependant, une telle stratégie :
+   - ne tient pas compte du fait que l'on peut aussi vouloir minimiser la fréquence des situations dans lesquelles ni l'importation ni d'éventuelles capacités fossiles additionnelles ne peuvent couvrir la demande (black-out). Autrement dit, au lieu de minimiser le déficit total (ou de façon équivalente, le déficit /moyen/), on peut chercher à vouloir minimiser les événements extrêmes.
+   - ici l'optimisation est faite au niveau national, ce qui minimise le recours aux interconnexions avec l'Europe. On pourrait aussi chercher à considérer des optimums européens, lesquels seront d'autant meilleurs que l'usage des interconnexions (et donc leur capacité a fortiori) est important. À cela j'opposerais que l'on peut vouloir étudier un scénario pessimiste concernant les facultés de coopération futures entre pays européens.
 
 ## TODO
 

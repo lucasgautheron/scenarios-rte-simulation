@@ -246,7 +246,9 @@ for scenario in scenarios:
         hist = np.cumsum(hist)
         hist = 100 * (hist - hist.min()) / hist.ptp()
         keep = np.abs(bin_edges[:-1]) < 50
-        ax.plot(bin_edges[:-1][keep], hist[keep], lw=1, label="power gap", color="#ff7f00")
+        ax.plot(
+            bin_edges[:-1][keep], hist[keep], lw=1, label="power gap", color="#ff7f00"
+        )
 
         years = pd.date_range(start=begin, end=end, freq="Y")
         for i in range(len(years) - 1):
@@ -280,6 +282,11 @@ for axs in [axes, axes_dispatch, axes_storage]:
 
 flex = "With" if flexibility else "Without"
 
+
+def plot_path(name):
+    return "output/{}{}.png".format(name, "_flexibility" if flexibility else "")
+
+
 plt.subplots_adjust(wspace=0, hspace=0)
 fig.suptitle(
     f"Simulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)"
@@ -292,7 +299,7 @@ fig.legend(
     ncol=len(labels),
     bbox_transform=fig.transFigure,
 )
-fig.savefig("output/load_supply.png", bbox_inches="tight", dpi=200)
+fig.savefig(plot_path("load_supply"), bbox_inches="tight", dpi=200)
 
 fig_storage.suptitle(
     f"Simulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)"
@@ -305,7 +312,7 @@ fig_storage.legend(
     ncol=len(labels_storage),
     bbox_transform=fig_storage.transFigure,
 )
-fig_storage.savefig("output/storage.png", bbox_inches="tight", dpi=200)
+fig_storage.savefig(plot_path("storage"), bbox_inches="tight", dpi=200)
 
 fig_dispatch.suptitle(
     f"Simulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)"
@@ -318,7 +325,7 @@ fig_dispatch.legend(
     ncol=len(labels_dispatch),
     bbox_transform=fig_dispatch.transFigure,
 )
-fig_dispatch.savefig("output/dispatch.png", bbox_inches="tight", dpi=200)
+fig_dispatch.savefig(plot_path("dispatch"), bbox_inches="tight", dpi=200)
 
 fig_gap_distribution.suptitle(
     f"Power gap cumulative distribution (%)\nSimulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)"
@@ -332,7 +339,7 @@ fig_gap_distribution.legend(
 )
 fig_gap_distribution.text(1, 0, "Lucas Gautheron", ha="right")
 fig_gap_distribution.savefig(
-    "output/gap_distribution.png", bbox_inches="tight", dpi=200
+    plot_path("gap_distribution"), bbox_inches="tight", dpi=200
 )
 
 plt.show()

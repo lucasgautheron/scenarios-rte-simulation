@@ -12,7 +12,7 @@ class Scenario:
         sources: dict = {},
         multistorage: dict = {},
         flexibility_power=0,
-        flexibility_time=8,
+        flexibility_time=4,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Run a mix scenario.
 

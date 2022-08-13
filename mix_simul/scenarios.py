@@ -2,18 +2,33 @@ from .consumption import *
 from .production import *
 from .storage import *
 
-import yaml
+from typing import Tuple
 
 
 class Scenario:
     def __init__(
         self,
-        yearly_total=645 * 1000,
+        yearly_total: float=None,
         sources: dict = {},
         multistorage: dict = {},
         flexibility_power=0,
         flexibility_time=8,
-    ):
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Run a mix scenario.
+
+        :param yearly_total: Annual consumption in GWh, for models with fixed annual consumption. defaults to None
+        :type yearly_total: _type_, optional
+        :param sources: float, defaults to {}
+        :type sources: dict, optional
+        :param multistorage: _description_, defaults to {}
+        :type multistorage: dict, optional
+        :param flexibility_power: _description_, defaults to 0
+        :type flexibility_power: int, optional
+        :param flexibility_time: _description_, defaults to 8
+        :type flexibility_time: int, optional
+        :return: Performance of the scenario. 
+        :rtype: Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
+        """
         self.yearly_total = yearly_total
         self.sources = sources
         self.multistorage = multistorage

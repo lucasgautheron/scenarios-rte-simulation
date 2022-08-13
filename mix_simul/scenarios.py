@@ -8,7 +8,7 @@ from typing import Tuple
 class Scenario:
     def __init__(
         self,
-        yearly_total: float=None,
+        yearly_total: float = None,
         sources: dict = {},
         multistorage: dict = {},
         flexibility_power=0,
@@ -26,7 +26,7 @@ class Scenario:
         :type flexibility_power: int, optional
         :param flexibility_time: _description_, defaults to 8
         :type flexibility_time: int, optional
-        :return: Performance of the scenario. 
+        :return: Performance of the scenario.
         :rtype: Tuple[float, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
         """
         self.yearly_total = yearly_total
@@ -57,7 +57,8 @@ class Scenario:
 
         # adjust power to load with storage
         storage_model = MultiStorageModel(
-            self.multistorage["capacity"],
+            np.array(self.multistorage["capacity"])
+            * np.array(self.multistorage["power"]),
             self.multistorage["power"],
             self.multistorage["power"],
             self.multistorage["efficiency"],

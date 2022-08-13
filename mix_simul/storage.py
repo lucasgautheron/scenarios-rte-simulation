@@ -46,7 +46,7 @@ class MultiStorageModel(StorageModel):
 
         self.storage_max_loads = np.array(storage_max_loads)
         self.storage_max_deliveries = np.array(storage_max_deliveries)
-        self.storage_capacities = np.array(storage_capacities) * self.storage_max_loads
+        self.storage_capacities = np.array(storage_capacities)
         self.storage_efficiencies = np.array(storage_efficiencies)
 
         self.n_storages = len(self.storage_capacities)

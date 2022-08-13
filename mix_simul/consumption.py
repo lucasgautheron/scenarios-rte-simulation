@@ -38,7 +38,7 @@ class FittedConsumptionModel(ConsumptionModel):
     def get(self, times: Union[pd.Series, np.ndarray]) -> np.ndarray:
         """Retrieve the consumption for each timestamp from the input array.
 
-        :param times: 1D array containing the input timestamps 
+        :param times: 1D array containing the input timestamps
         :type times: Union[pd.Series, np.ndarray]
         :return: 1D array of floats (consumption in GW) with the same length as the input.
         :rtype: np.ndarray
@@ -105,10 +105,30 @@ class FittedConsumptionModel(ConsumptionModel):
 
 class ConsumptionFlexibilityModel:
     def __init__(self, flexibility_power: float, flexibility_time: int):
+        """Consumption flexibility model.
+
+        Adapts consumption to supply under constraints.
+
+        :param flexibility_power: Maximum power that can be postponed at any time, in GW
+        :type flexibility_power: float
+        :param flexibility_time: Maximum consumption delay in hours
+        :type flexibility_time: int
+        """
         self.flexibility_power = flexibility_power
         self.flexibility_time = flexibility_time
 
-    def run(self, load: np.ndarray, supply: np.ndarray):
+    def run(self, load: np.ndarray, supply: np.ndarray) -> np.ndarray:
+        """Runs the model.
+
+        Given initial load and supply, the model returns an adjusted load optimized under constraints.
+
+        :param load: 1D array containing the initial load at each timestep, in GW
+        :type load: np.ndarray
+        :param supply: 1D array containing the power supply at each timestep, in GW
+        :type supply: np.ndarray
+        :return: 1D array containing the adjusted load at each timestep, in GW
+        :rtype: np.ndarray
+        """
         from functools import reduce
 
         T = len(supply)

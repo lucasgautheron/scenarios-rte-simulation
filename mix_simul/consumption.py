@@ -25,10 +25,24 @@ class ThermoModel(ConsumptionModel):
 
 class FittedConsumptionModel(ConsumptionModel):
     def __init__(self, yearly_total: float):
+        """Consumption Model fitted against observations of French electricity consumption (2012-2021).
+
+        The model captures seasonal, weekly and diurnal variations. It has only 1 parameter, the total annual consumption.
+
+        :param yearly_total: Total annual consumption in GWh.
+        :type yearly_total: float
+        """
         self.yearly_total = yearly_total
         self.fit()
 
-    def get(self, times: Union[pd.Series, np.ndarray]):
+    def get(self, times: Union[pd.Series, np.ndarray]) -> np.ndarray:
+        """Retrieve the consumption for each timestamp from the input array.
+
+        :param times: 1D array containing the input timestamps 
+        :type times: Union[pd.Series, np.ndarray]
+        :return: 1D array of floats (consumption in GW) with the same length as the input.
+        :rtype: np.ndarray
+        """
         # compute the load for the desired timestamps
         times = pd.DataFrame({"time": times}).set_index("time")
         times.index = pd.to_datetime(times.index, utc=True)

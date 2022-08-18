@@ -94,6 +94,7 @@ row = 0
 for scenario in scenarios:
     if not flexibility:
         scenarios[scenario]["flexibility_power"] = 0
+    
     scenario_model = Scenario(**scenarios[scenario])
     S, load, production, gap, storage, dp = scenario_model.run(times, p)
 

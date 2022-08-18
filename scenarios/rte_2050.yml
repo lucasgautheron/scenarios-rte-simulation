@@ -1,4 +1,5 @@
-M0:
+M0: 
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
@@ -10,6 +11,7 @@ M0:
     efficiency: [0.8, 0.8, 0.3]
 
 M1:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
@@ -21,6 +23,7 @@ M1:
     efficiency: [0.8, 0.8, 0.3]
 
 M23:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
@@ -32,6 +35,7 @@ M23:
     efficiency: [0.8, 0.8, 0.3]
 
 N1:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
@@ -43,6 +47,7 @@ N1:
     efficiency: [0.8, 0.8, 0.3]
 
 N2:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
@@ -54,6 +59,7 @@ N2:
     efficiency: [0.8, 0.8, 0.3]
 
 N03:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:

@@ -8,6 +8,7 @@ from typing import Tuple
 class Scenario:
     def __init__(
         self,
+        consumption_model: str = "FittedModel",
         yearly_total: float = None,
         sources: dict = {},
         multistorage: dict = {},
@@ -34,12 +35,23 @@ class Scenario:
         self.multistorage = multistorage
         self.flexibility_power = flexibility_power
         self.flexibility_time = flexibility_time
+        self.consumption_model_name = consumption_model
         pass
 
     def run(self, times, intermittent_load_factors):
         # consumption
-        consumption_model = FittedConsumptionModel(self.yearly_total)
-        load = consumption_model.get(times)
+        if self.consumption_model_name == "ThermoModel":
+            self.consumption_model = ThermoModel(yearly_total=self.yearly_total)
+        elif self.consumption_model_name == "FittedModel":
+            self.consumption_model = FittedConsumptionModel(
+                yearly_total=self.yearly_total
+            )
+        else:
+            raise NotImplementedError(
+                f"consumption model {self.consumption_model_name} not supported"
+            )
+
+        load = self.consumption_model.get(times)
 
         # intermittent sources (or sources with fixed load factors)
         intermittent_array = IntermittentArray(

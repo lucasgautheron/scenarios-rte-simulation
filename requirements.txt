@@ -4,3 +4,4 @@ numpy
 cvxpy
 numba
 matplotlib
+netCDF4

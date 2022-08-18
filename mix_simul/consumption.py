@@ -24,6 +24,26 @@ class ThermoModel(ConsumptionModel):
         ac_threshold: float = 20,
         debug: bool = False,
     ):
+        """Thermo-sensitive consumption model.
+
+        The model captures seasonal, weekly and diurnal variations of consumption,
+        as well as variations due to heating and cooling.
+
+        It has only 3 parameters:
+
+          - The annual average consumption in GWh.
+          - The heating temperature threshold in Celsius
+          - The cooling temperature threshold in Celsius
+
+        :param yearly_total: Total annual consumption in GWh.
+        :type yearly_total: float
+        :param heat_threshold: Temperature threshold below which linear heating effects arise, in Celsius, defaults to 15
+        :type heat_threshold: float, optional
+        :param ac_threshold: Temperature threshold above which linear cooling effects arise, in Celsius, defaults to 20
+        :type ac_threshold: float, optional
+        :param debug: If true, print debug information and plots, defaults to False
+        :type debug: bool, optional
+        """
         self.yearly_total = yearly_total
         self.heat_threshold = heat_threshold
         self.ac_threshold = ac_threshold
@@ -38,7 +58,7 @@ class ThermoModel(ConsumptionModel):
         self.temperatures.index = pd.to_datetime(self.temperatures.index, utc=True)
         self.temperatures -= 273.15
 
-        # fit observed consumption to the model
+        # fit the model according to previous observations
         self.fit(debug=debug)
 
     def observed_temperatures(
@@ -151,21 +171,34 @@ class ThermoModel(ConsumptionModel):
             prediction = self.fit_results.predict(hourly)
 
             fig, ax = plt.subplots(1, 1)
-            ax.plot(hourly.index, prediction, label="model")
-            ax.plot(hourly.index, hourly["conso"], label="observed")
+            ax.plot(hourly.index, prediction, label="model", lw=1)
+            ax.plot(hourly.index, hourly["conso"], label="observed", lw=1)
             plt.legend()
             plt.show()
 
         # normalize according to the desired total yearly consumption
         # this is only approximate.
-        intercept = (
-            self.fit_results.params[0]
-            + self.fit_results.params[1]
-            + hourly["heat_offset"].mean() * self.fit_results.params[-10]
+
+        # for that we need to find lambda such that:
+        # \lambda \times \langle base consumption\rangle + \langle heat+ac consumption\rangle = target
+
+        # first, calculate \langle base consumption\rangle
+        base = self.fit_results.params[0] + self.fit_results.params[1]
+
+        # then, calculate target - \langle heat+ac consumption\rangle
+        gap = self.yearly_total / (365.25 * 24) - (
+            hourly["heat_offset"].mean() * self.fit_results.params[-10]
             + hourly["ac_offset"].mean() * self.fit_results.params[-9]
         )
 
-        self.fit_results.params *= self.yearly_total / (intercept * 365.25 * 24)
+        # from which we can derive lambda:
+        lambd = gap / base
+
+        print(self.fit_results.params[:-10])
+        # ...and adjust the base load parameters:
+        self.fit_results.params[:-10] *= lambd
+        print(self.fit_results.params[:-10])
+
 
 
 class FittedConsumptionModel(ConsumptionModel):

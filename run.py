@@ -89,14 +89,18 @@ labels_dispatch = ["Hydro (GW)", "Biomass (GW)", "Thermal (GW)"]
 
 date_fmt = mdates.DateFormatter("%d/%m")
 
-# for step in np.linspace(start, stop, 2050-2022, True)[::-1]:
 row = 0
+previous_consumption_model = None
+
 for scenario in scenarios:
     if not flexibility:
         scenarios[scenario]["flexibility_power"] = 0
-    
+
     scenario_model = Scenario(**scenarios[scenario])
-    S, load, production, gap, storage, dp = scenario_model.run(times, p)
+    S, load, production, gap, storage, dp = scenario_model.run(
+        times, p, consumption_model=previous_consumption_model
+    )
+    previous_consumption_model = scenario_model.consumption_model
 
     print(f"{scenario}:", S, gap.max(), np.quantile(gap, 0.95))
     print(

@@ -38,10 +38,11 @@ class Scenario:
         self.consumption_model_name = consumption_model
         pass
 
-    def run(self, times, intermittent_load_factors):
-        # consumption
+    def build_consumption_model(self):
         if self.consumption_model_name == "ThermoModel":
-            self.consumption_model = ThermoModel(yearly_total=self.yearly_total)
+            self.consumption_model = ThermoModel(
+                yearly_total=self.yearly_total, debug=True
+            )
         elif self.consumption_model_name == "FittedModel":
             self.consumption_model = FittedConsumptionModel(
                 yearly_total=self.yearly_total
@@ -50,6 +51,13 @@ class Scenario:
             raise NotImplementedError(
                 f"consumption model {self.consumption_model_name} not supported"
             )
+
+    def run(self, times, intermittent_load_factors, consumption_model=None):
+        # consumption
+        if consumption_model is not None:
+            self.consumption_model = consumption_model
+        else:
+            self.build_consumption_model()
 
         load = self.consumption_model.get(times)
 

@@ -55,7 +55,8 @@ Consulter les instructions pour Windows ou concernant tout éventuel problème i
 ```
 datalad install git@github.com:lucasgautheron/scenarios-rte-simulation.git
 cd scenarios-rte-simulation
-datalad get .
+datalad get data/*.csv
+datalad get data/*.parquet
 ```
 
 ### Installation des dépendances

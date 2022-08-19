@@ -44,6 +44,15 @@ class IntermittentArray(PowerSupply):
         return np.einsum("ijk,ik", self.load_factors, self.capacity_per_region)
 
 
+class ConstantSource(PowerSupply):
+    def __init__(self, constant_power: float, T: int):
+        self.constant_power = constant_power
+        self.T = T
+
+    def power(self) -> np.ndarray:
+        return np.repeat(self.constant_power, self.T)
+
+
 class DispatchableArray(PowerSupply):
     def __init__(self, dispatchable: np.ndarray):
         """Dispatchable power supply.

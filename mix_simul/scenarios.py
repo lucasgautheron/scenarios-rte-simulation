@@ -8,11 +8,12 @@ from typing import Tuple
 class Scenario:
     def __init__(
         self,
+        consumption_model: str = "FittedModel",
         yearly_total: float = None,
         sources: dict = {},
         multistorage: dict = {},
         flexibility_power=0,
-        flexibility_time=4,
+        flexibility_time=8,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Run a mix scenario.
 
@@ -34,29 +35,49 @@ class Scenario:
         self.multistorage = multistorage
         self.flexibility_power = flexibility_power
         self.flexibility_time = flexibility_time
+
+        self.consumption_model_name = consumption_model
+        self.consumption_model = None
+
+        self.intermittent_model = None
+        self.constant_model = None
+        self.storage_model = None
+        self.flexibility_model = None
+        self.dispatchable_model = None
         pass
 
-    def run(self, times, intermittent_load_factors):
+    def build_consumption_model(self):
+        if self.consumption_model_name == "ThermoModel":
+            mdl = ThermoModel
+        elif self.consumption_model_name == "FittedModel":
+            mdl = FittedConsumptionModel
+        else:
+            raise NotImplementedError(
+                f"consumption model {self.consumption_model_name} not supported"
+            )
+
+        self.consumption_model = mdl(yearly_total=self.yearly_total)
+
+    def run(self, times, intermittent_load_factors, consumption_model=None):
         # consumption
-        consumption_model = FittedConsumptionModel(self.yearly_total)
-        load = consumption_model.get(times)
+        if consumption_model is not None:
+            self.consumption_model = consumption_model
+        else:
+            self.build_consumption_model()
+
+        load = self.consumption_model.get(times)
 
         # intermittent sources (or sources with fixed load factors)
-        intermittent_array = IntermittentArray(
+        self.intermittent_model = IntermittentArray(
             intermittent_load_factors, np.transpose([self.sources["intermittent"]])
         )
-        power = intermittent_array.power()
+        power = self.intermittent_model.power()
 
-        if self.flexibility_power > 0:
-            flexibility_model = ConsumptionFlexibilityModel(
-                self.flexibility_power, self.flexibility_time
-            )
-            load = flexibility_model.run(load, power)
-
-        power_delta = power - load
+        self.constant_model = ConstantSource(self.sources["constant"] * 0.7, len(load))
+        power += self.constant_model.power()
 
         # adjust power to load with storage
-        storage_model = MultiStorageModel(
+        self.storage_model = MultiStorageModel(
             np.array(self.multistorage["capacity"])
             * np.array(self.multistorage["power"]),
             self.multistorage["power"],
@@ -64,12 +85,20 @@ class Scenario:
             self.multistorage["efficiency"],
         )
 
-        storage, storage_impact = storage_model.run(power_delta)
+        storage, storage_impact = self.storage_model.run(power - load)
+        gap = load - power - storage_impact.sum(axis=0)
+
+        if self.flexibility_power > 0:
+            self.flexibility_model = ConsumptionFlexibilityModel(
+                self.flexibility_power, self.flexibility_time
+            )
+            load = self.flexibility_model.run(load, power + storage_impact.sum(axis=0))
+
         gap = load - power - storage_impact.sum(axis=0)
 
         # further adjust power to load with dispatchable power sources
-        dispatchable_model = DispatchableArray(self.sources["dispatchable"])
-        dp = dispatchable_model.power(gap)
+        self.dispatchable_model = DispatchableArray(self.sources["dispatchable"])
+        dp = self.dispatchable_model.power(gap)
 
         gap -= dp.sum(axis=0)
         S = np.maximum(gap, 0).mean()

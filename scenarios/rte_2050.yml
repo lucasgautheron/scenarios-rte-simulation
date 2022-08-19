@@ -1,8 +1,10 @@
-M0:
+M0: 
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
-    intermittent: [74, 62, 208, 0]
+    intermittent: [74, 62, 208]
+    constant: 0
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [26, 8, 29]
@@ -10,10 +12,12 @@ M0:
     efficiency: [0.8, 0.8, 0.3]
 
 M1:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
-    intermittent: [59, 45, 214, 16]
+    intermittent: [59, 45, 214]
+    constant: 16
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [21, 8, 20]
@@ -21,10 +25,12 @@ M1:
     efficiency: [0.8, 0.8, 0.3]
 
 M23:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
-    intermittent: [72, 60, 125, 16]
+    intermittent: [72, 60, 125]
+    constant: 16
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [13, 8, 20]
@@ -32,10 +38,12 @@ M23:
     efficiency: [0.8, 0.8, 0.3]
 
 N1:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
-    intermittent: [58, 45, 118, 29]
+    intermittent: [58, 45, 118]
+    constant: 29
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [9, 8, 11]
@@ -43,10 +51,12 @@ N1:
     efficiency: [0.8, 0.8, 0.3]
 
 N2:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
-    intermittent: [52, 36, 90, 39]
+    intermittent: [52, 36, 90]
+    constant: 39
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [2, 8, 5]
@@ -54,10 +64,12 @@ N2:
     efficiency: [0.8, 0.8, 0.3]
 
 N03:
+  consumption_model: ThermoModel
   yearly_total: 645000
   flexibility_power: 17
   sources:
-    intermittent: [43, 22, 70, 51]
+    intermittent: [43, 22, 70]
+    constant: 51
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [1, 8, 0]

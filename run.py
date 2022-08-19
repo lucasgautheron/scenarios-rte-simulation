@@ -45,8 +45,6 @@ potential = potential.loc[(slice(f"{begin} 00:00:00", f"{end} 00:00:00"), "FR"),
 
 # intermittent sources potential
 p = potential[["onshore", "offshore", "solar"]].to_xarray().to_array()
-p = np.insert(p, 3, 0.7, axis=0)  # nuclear power-like
-
 times = potential.index.get_level_values(0)
 
 n_scenarios = len(scenarios)
@@ -73,6 +71,12 @@ fig_gap_distribution, axes_gap_distribution = plt.subplots(
 )
 fig_gap_distribution.set_figwidth(w * 1.5)
 fig_gap_distribution.set_figheight(h * 1.5)
+
+fig_thermo, axes_thermo = plt.subplots(
+    nrows=int(np.ceil(n_scenarios / 2)), ncols=2, sharex="col", sharey=True
+)
+fig_thermo.set_figwidth(w * 1.5)
+fig_thermo.set_figheight(h * 1.5)
 
 months = ["Février", "Juin"]
 
@@ -113,8 +117,16 @@ for scenario in scenarios:
 
     potential["load"] = load
     potential["production"] = production
+    potential["intermittent"] = scenario_model.intermittent_model.power()
     potential["available"] = production - np.diff(storage.sum(axis=0), append=0)
     potential["gap"] = gap
+
+    if scenario_model.consumption_model.__class__.__name__ == "ThermoModel":
+        potential[
+            "temperature"
+        ] = scenario_model.consumption_model.observed_temperatures(
+            pd.to_datetime(times, utc=True), missing_method="nearest"
+        ).values
 
     for i in range(3):
         potential[f"storage_{i}"] = np.diff(
@@ -271,6 +283,53 @@ for scenario in scenarios:
 
         ax.text(0.5, 0.87, f"Scénario {scenario}", ha="center", transform=ax.transAxes)
 
+        if scenario_model.consumption_model.__class__.__name__ == "ThermoModel":
+            ax = (
+                axes_thermo[row % div, row // div]
+                if axes_thermo.ndim > 1
+                else axes_thermo[row % div]
+            )
+
+            daily = (
+                potential.reset_index(level=1, drop=True)
+                .resample("1D")
+                .agg({
+                    'load': 'sum',
+                    'intermittent': 'sum',
+                    'temperature': 'mean',
+                })
+            )
+
+            cm = plt.cm.get_cmap("coolwarm")
+
+            scatter = ax.scatter(
+                daily["load"],
+                daily["intermittent"],
+                c=daily["temperature"],
+                vmin=5*(daily["temperature"].min()//5),
+                vmax=5*(daily["temperature"].max()//5+1),
+                s=1,
+                cmap=cm,
+                alpha=1,
+            )
+
+            ax.set_xlim(np.quantile(daily["load"], 0.01), np.quantile(daily["load"], 0.99))
+            ax.set_ylim(0)
+
+            xpoints = ypoints = ax.get_xlim()
+
+            ax.plot(
+                xpoints,
+                ypoints,
+                ls="dashed",
+                color="black",
+                alpha=0.5,
+                lw=1,
+            )
+            ax.text(
+                0.5, 0.87, f"Scénario {scenario}", ha="center", transform=ax.transAxes
+            )
+
     row += 1
 
 for axs in [axes, axes_dispatch, axes_storage]:
@@ -340,11 +399,18 @@ fig_gap_distribution.legend(
     loc="lower right",
     bbox_to_anchor=(1, -0.1),
     ncol=1,
-    bbox_transform=fig_dispatch.transFigure,
+    bbox_transform=fig_gap_distribution.transFigure,
 )
 fig_gap_distribution.text(1, 0, "Lucas Gautheron", ha="right")
 fig_gap_distribution.savefig(
     plot_path("gap_distribution"), bbox_inches="tight", dpi=200
 )
+
+fig_thermo.suptitle(
+    f"Daily consumption (in GWh) vs intermittent production (in GWh)\nSimulations based on {begin}--{end} weather data."
+)
+fig.colorbar(scatter, ax=axes_thermo.ravel().tolist())
+fig_thermo.text(0.8, 0, "Lucas Gautheron", ha="right")
+fig_thermo.savefig(plot_path("thermo_sensitivity"), bbox_inches="tight", dpi=200)
 
 plt.show()

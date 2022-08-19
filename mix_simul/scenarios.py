@@ -13,7 +13,7 @@ class Scenario:
         sources: dict = {},
         multistorage: dict = {},
         flexibility_power=0,
-        flexibility_time=4,
+        flexibility_time=8,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         """Run a mix scenario.
 
@@ -40,17 +40,15 @@ class Scenario:
 
     def build_consumption_model(self):
         if self.consumption_model_name == "ThermoModel":
-            self.consumption_model = ThermoModel(
-                yearly_total=self.yearly_total, debug=True
-            )
+            mdl = ThermoModel
         elif self.consumption_model_name == "FittedModel":
-            self.consumption_model = FittedConsumptionModel(
-                yearly_total=self.yearly_total
-            )
+            mdl = FittedConsumptionModel
         else:
             raise NotImplementedError(
                 f"consumption model {self.consumption_model_name} not supported"
             )
+        
+        self.consumption_model = mdl(yearly_total=self.yearly_total)
 
     def run(self, times, intermittent_load_factors, consumption_model=None):
         # consumption
@@ -67,14 +65,6 @@ class Scenario:
         )
         power = intermittent_array.power()
 
-        if self.flexibility_power > 0:
-            flexibility_model = ConsumptionFlexibilityModel(
-                self.flexibility_power, self.flexibility_time
-            )
-            load = flexibility_model.run(load, power)
-
-        power_delta = power - load
-
         # adjust power to load with storage
         storage_model = MultiStorageModel(
             np.array(self.multistorage["capacity"])
@@ -84,7 +74,15 @@ class Scenario:
             self.multistorage["efficiency"],
         )
 
-        storage, storage_impact = storage_model.run(power_delta)
+        storage, storage_impact = storage_model.run(power - load)
+        gap = load - power - storage_impact.sum(axis=0)
+
+        if self.flexibility_power > 0:
+            flexibility_model = ConsumptionFlexibilityModel(
+                self.flexibility_power, self.flexibility_time
+            )
+            load = flexibility_model.run(load, power + storage_impact.sum(axis=0))
+
         gap = load - power - storage_impact.sum(axis=0)
 
         # further adjust power to load with dispatchable power sources

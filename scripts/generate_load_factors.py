@@ -1,3 +1,5 @@
+import pandas as pd
+
 wind_data = pd.read_csv("data/ninja_wind_europe_v1.1_current_on-offshore.csv")
 solar_data = pd.read_csv("data/ninja_pv_europe_v1.1_merra2.csv")
 

@@ -173,6 +173,7 @@ class ThermoModel(ConsumptionModel):
             fig, ax = plt.subplots(1, 1)
             ax.plot(hourly.index, prediction, label="model", lw=1)
             ax.plot(hourly.index, hourly["conso"], label="observed", lw=1)
+
             plt.legend()
             plt.show()
 
@@ -186,19 +187,16 @@ class ThermoModel(ConsumptionModel):
         base = self.fit_results.params[0] + self.fit_results.params[1]
 
         # then, calculate target - \langle heat+ac consumption\rangle
-        gap = self.yearly_total / (365.25 * 24) - (
+        base_target = self.yearly_total / (365.25 * 24) - (
             hourly["heat_offset"].mean() * self.fit_results.params[-10]
             + hourly["ac_offset"].mean() * self.fit_results.params[-9]
         )
 
         # from which we can derive lambda:
-        lambd = gap / base
+        lambd = base_target / base
 
-        print(self.fit_results.params[:-10])
         # ...and adjust the base load parameters:
         self.fit_results.params[:-10] *= lambd
-        print(self.fit_results.params[:-10])
-
 
 
 class FittedConsumptionModel(ConsumptionModel):
@@ -313,25 +311,29 @@ class ConsumptionFlexibilityModel:
         tau = self.flexibility_time
 
         h = cp.Variable((T, tau + 1))
+        load_matrix = np.fromfunction(
+            lambda t, l: load[np.maximum(t - l, 0).astype(int)], (T, tau + 1)
+        )
 
         constraints = [
             h >= 0,
             h <= 1,
             # bound on the fraction of the demand at any time that can be postponed
             h[:, 0] >= 1 - self.flexibility_power / load,
-            cp.multiply(load, cp.sum(h, axis=1)) - load <= self.flexibility_power,
         ] + [
             # total demand conservation
-            reduce(lambda x, y: x + y, [h[t - l, l] for l in range(tau)]) == 1
+            reduce(lambda x, y: x + y, [h[t - l, l] for l in range(tau + 1)]) == 1
             for t in np.arange(tau, T)
         ]
 
         prob = cp.Problem(
-            cp.Minimize(cp.sum(cp.pos(cp.multiply(load, cp.sum(h, axis=1)) - supply))),
+            cp.Minimize(
+                cp.sum(cp.pos(cp.sum(cp.multiply(load_matrix, h), axis=1) - supply))
+            ),
             constraints,
         )
 
         prob.solve(verbose=True, solver=cp.ECOS, max_iters=300)
 
         hb = np.array(h.value)
-        return load * np.sum(hb, axis=1)
+        return np.sum(np.multiply(load_matrix, hb), axis=1)

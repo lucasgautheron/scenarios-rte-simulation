@@ -128,8 +128,8 @@ for scenario in scenarios:
     potential["dispatch"] = dp.sum(axis=0)
 
     data = [
-        potential.loc[(slice("2013-02-01 00:00:00", "2013-03-01 00:00:00"), "FR"), :],
-        potential.loc[(slice("2013-06-01 00:00:00", "2013-07-01 00:00:00"), "FR"), :],
+        potential.loc[(slice("2014-02-01 00:00:00", "2014-03-01 00:00:00"), "FR"), :],
+        potential.loc[(slice("2014-06-01 00:00:00", "2014-07-01 00:00:00"), "FR"), :],
     ]
 
     for col in range(2):

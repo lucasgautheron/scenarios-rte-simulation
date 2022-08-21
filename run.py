@@ -41,6 +41,18 @@ begin = args.begin
 end = args.end
 flexibility = args.flexibility
 
+months = pd.date_range(args.begin, args.end, freq="1MS")
+febs = [month for month in months if month.month == 2]
+junes = [month for month in months if month.month == 6]
+feb = (
+    febs[-1].strftime("%Y-%m-%d %H:%M:%S"),
+    febs[-1].replace(month=3).strftime("%Y-%m-%d %H:%M:%S"),
+)
+june = (
+    junes[-1].strftime("%Y-%m-%d %H:%M:%S"),
+    junes[-1].replace(month=7).strftime("%Y-%m-%d %H:%M:%S"),
+)
+
 potential = potential.loc[(slice(f"{begin} 00:00:00", f"{end} 00:00:00"), "FR"), :]
 
 # intermittent sources potential
@@ -140,8 +152,20 @@ for scenario in scenarios:
     potential["dispatch"] = dp.sum(axis=0)
 
     data = [
-        potential.loc[(slice("2014-02-01 00:00:00", "2014-03-01 00:00:00"), "FR"), :],
-        potential.loc[(slice("2014-06-01 00:00:00", "2014-07-01 00:00:00"), "FR"), :],
+        potential.loc[
+            (
+                slice(feb[0], feb[1]),
+                "FR",
+            ),
+            :,
+        ],
+        potential.loc[
+            (
+                slice(june[0], june[1]),
+                "FR",
+            ),
+            :,
+        ],
     ]
 
     for col in range(2):
@@ -293,11 +317,13 @@ for scenario in scenarios:
             daily = (
                 potential.reset_index(level=1, drop=True)
                 .resample("1D")
-                .agg({
-                    'load': 'sum',
-                    'intermittent': 'sum',
-                    'temperature': 'mean',
-                })
+                .agg(
+                    {
+                        "load": "sum",
+                        "intermittent": "sum",
+                        "temperature": "mean",
+                    }
+                )
             )
 
             cm = plt.cm.get_cmap("coolwarm")
@@ -306,14 +332,16 @@ for scenario in scenarios:
                 daily["load"],
                 daily["intermittent"],
                 c=daily["temperature"],
-                vmin=5*(daily["temperature"].min()//5),
-                vmax=5*(daily["temperature"].max()//5+1),
+                vmin=5 * (daily["temperature"].min() // 5),
+                vmax=5 * (daily["temperature"].max() // 5 + 1),
                 s=1,
                 cmap=cm,
                 alpha=1,
             )
 
-            ax.set_xlim(np.quantile(daily["load"], 0.01), np.quantile(daily["load"], 0.99))
+            ax.set_xlim(
+                np.quantile(daily["load"], 0.01), np.quantile(daily["load"], 0.99)
+            )
             ax.set_ylim(0)
 
             xpoints = ypoints = ax.get_xlim()

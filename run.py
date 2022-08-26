@@ -28,6 +28,9 @@ parser.add_argument(
     help="path to scenarios parameters yml file",
     default="scenarios/rte_2050.yml",
 )
+parser.add_argument(
+    "--p2g-multiplier", help="power 2 gas capacity multiplier", default=1, type=float
+)
 args = parser.parse_args()
 
 with open(args.scenarios, "r") as f:
@@ -72,6 +75,16 @@ fig_storage, axes_storage = plt.subplots(
 fig_storage.set_figwidth(w * 1.5)
 fig_storage.set_figheight(h * 1.5)
 
+fig_storage_monthly, axes_storage_monthly = plt.subplots(
+    nrows=int(np.ceil(n_scenarios / 2)),
+    ncols=2,
+    sharex="col",
+    sharey=True,
+    gridspec_kw={"wspace": 0, "hspace": 0},
+)
+fig_storage_monthly.set_figwidth(w * 1.5)
+fig_storage_monthly.set_figheight(h * 1.5)
+
 fig_dispatch, axes_dispatch = plt.subplots(
     nrows=n_scenarios, ncols=2, sharex="col", sharey=True
 )
@@ -113,7 +126,9 @@ for scenario in scenarios:
         scenarios[scenario]["flexibility_power"] = 0
 
     scenario_model = Scenario(**scenarios[scenario])
-    S, load, production, gap, storage, dp = scenario_model.run(
+    scenario_model.storage_model.storage_max_loads[2] *= args.p2g_multiplier
+
+    S, load, production, gap, storage, storage_impact, dp = scenario_model.run(
         times, p, consumption_model=previous_consumption_model
     )
     previous_consumption_model = scenario_model.consumption_model
@@ -130,8 +145,12 @@ for scenario in scenarios:
     potential["load"] = load
     potential["production"] = production
     potential["intermittent"] = scenario_model.intermittent_model.power()
-    potential["available"] = production - np.diff(storage.sum(axis=0), append=0)
+    potential["available"] = production + storage_impact.sum(axis=0)
     potential["gap"] = gap
+    potential["yearmonth"] = (
+        potential.index.get_level_values(0).strftime("%Y%m").astype(int)
+    )
+    potential["month"] = potential.index.get_level_values(0).month
 
     if scenario_model.consumption_model.__class__.__name__ == "ThermoModel":
         potential[
@@ -141,9 +160,7 @@ for scenario in scenarios:
         ).values
 
     for i in range(3):
-        potential[f"storage_{i}"] = np.diff(
-            storage[i, :], append=0
-        )  # storage[i,:]/1000
+        potential[f"storage_delta_{i}"] = np.diff(storage[i, :], append=0)
         potential[f"storage_{i}"] = storage[i, :] / 1000
 
     for i in range(dp.shape[0]):
@@ -240,6 +257,75 @@ for scenario in scenarios:
             0.87,
             f"Scénario {scenario} ({months[col]})",
             ha="center",
+            transform=ax.transAxes,
+        )
+
+        div = int(np.ceil(n_scenarios / 2))
+        ax = (
+            axes_storage_monthly[row % div, row // div]
+            if axes_storage_monthly.ndim > 1
+            else axes_storage_monthly[row % div]
+        )
+
+        agg = (
+            potential[
+                potential.index.get_level_values(0).year
+                > potential.index.get_level_values(0).min().year
+            ]
+            .groupby("yearmonth")
+            .agg(
+                power2gas=(
+                    "storage_delta_2",
+                    lambda x: -np.sum(np.maximum(0, x)),
+                ),
+                gas2power=("storage_delta_2", lambda x: np.sum(np.maximum(0, -x))),
+                month=("month", "first"),
+            )
+            .groupby("month")
+            .mean()
+        )
+
+        ax.bar(
+            agg.index,
+            agg["power2gas"] / 1000,
+            label="power to gas (TWh PCI)",
+            lw=0.25,
+            color="#377eb8",
+        )
+
+        ax.bar(
+            agg.index,
+            agg["power2gas"] / scenario_model.multistorage["efficiency"][2] / 1000,
+            label="power to gas (TWh)",
+            lw=0.25,
+            fill=False,
+            ls="dashed",
+            edgecolor="#377eb8",
+        )
+
+        ax.bar(
+            agg.index,
+            agg["gas2power"] / 1000,
+            label="gas to power (TWh PCI)",
+            lw=0.25,
+            color="#ff7f00",
+        )
+
+        ax.scatter(
+            agg.index,
+            (agg["gas2power"] + agg["power2gas"]) / 1000,
+            s=1,
+            color="black",
+            zorder=100,
+            label="net (TWh PCI)",
+        )
+
+        ax.text(0.5, 0.87, f"Scénario {scenario}", ha="center", transform=ax.transAxes)
+        ax.text(
+            0.95,
+            0.05,
+            f"{scenario_model.storage_model.storage_max_loads[2]:.0f} GW",
+            ha="right",
             transform=ax.transAxes,
         )
 
@@ -405,6 +491,25 @@ fig_storage.legend(
     bbox_transform=fig_storage.transFigure,
 )
 fig_storage.savefig(plot_path("storage"), bbox_inches="tight", dpi=200)
+
+fig_storage_monthly.suptitle(
+    f"Simulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)"
+)
+fig_storage_monthly.text(1, 0, "Lucas Gautheron", ha="right")
+handles, labels = axes_storage_monthly.item(0).get_legend_handles_labels()
+fig_storage_monthly.legend(
+    handles=handles[1:1+4],
+    labels=labels[1:1+4],
+    loc="lower right",
+    bbox_to_anchor=(1, -0.1),
+    ncol=4,
+    bbox_transform=fig_storage_monthly.transFigure,
+)
+fig_storage_monthly.savefig(
+    plot_path(f"storage_monthly_x{args.p2g_multiplier:.0f}"),
+    bbox_inches="tight",
+    dpi=200,
+)
 
 fig_dispatch.suptitle(
     f"Simulations based on {begin}--{end} weather data.\n{flex} consumption flexibility; no nuclear seasonality (unrealistic)"

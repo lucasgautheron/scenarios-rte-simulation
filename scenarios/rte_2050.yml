@@ -8,8 +8,8 @@ M0:
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [26, 8, 29]
-    capacity: [4, 24, 336]
-    efficiency: [0.8, 0.8, 0.3]
+    capacity: [4, 40, 504]
+    efficiency: [0.8, 0.75, 0.30]
 
 M1:
   consumption_model: ThermoModel
@@ -21,8 +21,8 @@ M1:
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [21, 8, 20]
-    capacity: [4, 24, 336]
-    efficiency: [0.8, 0.8, 0.3]
+    capacity: [4, 40, 504]
+    efficiency: [0.8, 0.75, 0.30]
 
 M23:
   consumption_model: ThermoModel
@@ -34,8 +34,8 @@ M23:
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [13, 8, 20]
-    capacity: [4, 24, 336]
-    efficiency: [0.8, 0.8, 0.3]
+    capacity: [4, 40, 504]
+    efficiency: [0.8, 0.75, 0.30]
 
 N1:
   consumption_model: ThermoModel
@@ -47,8 +47,8 @@ N1:
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [9, 8, 11]
-    capacity: [4, 24, 336]
-    efficiency: [0.8, 0.8, 0.3]
+    capacity: [4, 40, 504]
+    efficiency: [0.8, 0.75, 0.30]
 
 N2:
   consumption_model: ThermoModel
@@ -60,8 +60,8 @@ N2:
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [2, 8, 5]
-    capacity: [4, 24, 336]
-    efficiency: [0.8, 0.8, 0.3]
+    capacity: [4, 40, 504]
+    efficiency: [0.8, 0.75, 0.30]
 
 N03:
   consumption_model: ThermoModel
@@ -73,5 +73,5 @@ N03:
     dispatchable: [[22, 63000], [2, 12000], [0.5, 1000000000]]
   multistorage:
     power: [1, 8, 0]
-    capacity: [4, 24, 336]
-    efficiency: [0.8, 0.8, 0.3]
+    capacity: [4, 40, 504]
+    efficiency: [0.8, 0.75, 0.30]

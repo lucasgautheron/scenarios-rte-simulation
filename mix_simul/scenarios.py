@@ -32,22 +32,32 @@ class Scenario:
         """
         self.yearly_total = yearly_total
         self.sources = sources
+
         self.multistorage = multistorage
+        self.storage_model = MultiStorageModel(
+            np.array(self.multistorage["capacity"])
+            * np.array(self.multistorage["power"]),
+            self.multistorage["power"],
+            self.multistorage["power"],
+            self.multistorage["efficiency"],
+        )
+
         self.flexibility_power = flexibility_power
         self.flexibility_time = flexibility_time
+        self.flexibility_model = None
 
         self.consumption_model_name = consumption_model
         self.consumption_model = None
 
         self.intermittent_model = None
         self.constant_model = None
-        self.storage_model = None
-        self.flexibility_model = None
         self.dispatchable_model = None
         pass
 
     def build_consumption_model(self):
-        if self.consumption_model_name == "ThermoModel":
+        if self.consumption_model_name == "ProbabilisticThermoModel":
+            mdl = ProbabilisticThermoModel
+        elif self.consumption_model_name == "ThermoModel":
             mdl = ThermoModel
         elif self.consumption_model_name == "FittedModel":
             mdl = FittedConsumptionModel
@@ -76,24 +86,14 @@ class Scenario:
         self.constant_model = ConstantSource(self.sources["constant"] * 0.7, len(load))
         power += self.constant_model.power()
 
-        # adjust power to load with storage
-        self.storage_model = MultiStorageModel(
-            np.array(self.multistorage["capacity"])
-            * np.array(self.multistorage["power"]),
-            self.multistorage["power"],
-            self.multistorage["power"],
-            self.multistorage["efficiency"],
-        )
-
-        storage, storage_impact = self.storage_model.run(power - load)
-        gap = load - power - storage_impact.sum(axis=0)
-
         if self.flexibility_power > 0:
             self.flexibility_model = ConsumptionFlexibilityModel(
                 self.flexibility_power, self.flexibility_time
             )
-            load = self.flexibility_model.run(load, power + storage_impact.sum(axis=0))
-
+            load = self.flexibility_model.run(load, power)
+        
+        # adjust power to load with storage
+        storage, storage_impact = self.storage_model.run(power - load)
         gap = load - power - storage_impact.sum(axis=0)
 
         # further adjust power to load with dispatchable power sources
@@ -103,4 +103,4 @@ class Scenario:
         gap -= dp.sum(axis=0)
         S = np.maximum(gap, 0).mean()
 
-        return S, load, power, gap, storage, dp
+        return S, load, power, gap, storage, storage_impact, dp

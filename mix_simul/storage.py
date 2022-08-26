@@ -6,11 +6,9 @@ from typing import Tuple
 @numba.njit
 def storage_iterate(dE, capacity, efficiency, n):
     storage = np.zeros(n)
+    dE[dE >= 0] *= efficiency
 
     for i in np.arange(1, n):
-        if dE[i] >= 0:
-            dE[i] *= efficiency
-
         storage[i] = np.maximum(0, np.minimum(capacity, storage[i - 1] + dE[i - 1]))
 
     return storage
@@ -70,8 +68,6 @@ class MultiStorageModel(StorageModel):
         T = len(power_delta)
 
         available_power = power_delta
-        excess_power = np.maximum(0, available_power)
-        deficit_power = np.maximum(0, -available_power)
 
         storage_try_load = np.zeros((self.n_storages, T))
         storage_try_delivery = np.zeros((self.n_storages, T))
@@ -81,6 +77,9 @@ class MultiStorageModel(StorageModel):
         dE_storage = np.zeros((self.n_storages, T))
 
         for i in range(self.n_storages):
+            excess_power = np.maximum(0, available_power)
+            deficit_power = np.maximum(0, -available_power)
+
             storage_try_load[i] = np.minimum(excess_power, self.storage_max_loads[i])
             storage_try_delivery[i] = np.minimum(
                 deficit_power, self.storage_max_deliveries[i]
@@ -103,7 +102,5 @@ class MultiStorageModel(StorageModel):
             )
 
             available_power += storage_impact[i]
-            excess_power = np.maximum(0, available_power)
-            deficit_power = np.maximum(0, -available_power)
 
         return storage, storage_impact
